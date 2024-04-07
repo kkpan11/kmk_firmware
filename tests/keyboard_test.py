@@ -1,3 +1,5 @@
+import digitalio
+
 import time
 from unittest.mock import Mock, patch
 
@@ -50,6 +52,7 @@ class KeyboardTest:
         self.keyboard.matrix = MatrixScanner(
             cols=self.keyboard.col_pins,
             rows=self.keyboard.row_pins,
+            pull=digitalio.Pull.DOWN,
             diode_orientation=self.keyboard.diode_orientation,
         )
         self.keyboard.keymap = keymap
@@ -94,8 +97,8 @@ class KeyboardTest:
             try:
                 hid_report = hid_reports[i]
             except IndexError:
-                report_mods = None
-                report_keys = [None]
+                report_mods = 0
+                report_keys = set()
             else:
                 report_mods = hid_report[0]
                 report_keys = {code for code in hid_report[2:] if code != 0}

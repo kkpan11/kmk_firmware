@@ -31,8 +31,10 @@ Here's how you may initialize the extension. Note that this includes examples of
 import board
 import busio
 
+from kmk.extensions.display import Display, TextEntry, ImageEntry
+
 # For SSD1306
-from kmk.extensions.display import Display, SSD1306, TextEntry, ImageEntry
+from kmk.extensions.display.ssd1306 import SSD1306
 
 # Replace SCL and SDA according to your hardware configuration.
 i2c_bus = busio.I2C(board.GP_SCL, board.GP_SDA)
@@ -45,7 +47,7 @@ driver = SSD1306(
 )
 
 # For SH1106
-from kmk.extensions.display import Display, SH1106, TextEntry, ImageEntry
+from kmk.extensions.display.sh1106 import SH1106
 
 # Replace SCK and MOSI according to your hardware configuration.
 spi_bus = busio.SPI(board.GP_SCK, board.GP_MOSI)
@@ -60,7 +62,8 @@ driver = SH1106(
 )
 
 # For displays initialized by CircuitPython by default
-from kmk.extensions.display import Display, BuiltInDisplay, TextEntry, ImageEntry
+# IMPORTANT: breaks if a display backend from kmk.extensions.display is also in use
+from kmk.extensions.display.builtin import BuiltInDisplay
 
 # Replace display, sleep_command, and wake_command according to your hardware configuration.
 driver = BuiltInDisplay(
@@ -197,10 +200,14 @@ layers = Layers()
 keyboard.modules.append(layers)
 
 i2c_bus = busio.I2C(board.GP21, board.GP20)
-display_driver = SSD1306(i2c=i2c_bus)
+display_driver = SSD1306(
+    i2c=i2c_bus,
+    # Optional device_addres argument. Default is 0x3C.
+    # device_address=0x3C,
+)
 
 display = Display(
-    display=display_driver
+    display=display_driver,
     entries=[
         TextEntry(text='Layer: ', x=0, y=32, y_anchor='B'),
         TextEntry(text='BASE', x=40, y=32, y_anchor='B', layer=0),
@@ -211,11 +218,11 @@ display = Display(
         TextEntry(text='1', x=12, y=4, inverted=True, layer=1),
         TextEntry(text='2', x=24, y=4, inverted=True, layer=2),
     ],
-    device_address=0x3C,
-    width=128,
+    # Optional width argument. Default is 128.
+    # width=128,
     height=64,
     dim_time=10,
-    dim_target=0.1,
+    dim_target=0.2,
     off_time=1200,
     brightness=1,
 )
